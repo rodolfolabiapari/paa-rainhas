@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGdefault{k}{typedef} \PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Tabuleiro} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{colunas}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int}   \PYGdefault{n}{premio}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{n}{Tabuleiro}\PYGdefault{p}{;}
+\end{Verbatim}

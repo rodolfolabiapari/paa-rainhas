@@ -1,0 +1,758 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGdefault{c+cp}{\PYGdefaultZsh{}include} \PYGdefault{c+cpf}{\PYGdefaultZlt{}stdio.h\PYGdefaultZgt{}}
+\PYGdefault{c+cp}{\PYGdefaultZsh{}include} \PYGdefault{c+cpf}{\PYGdefaultZlt{}stdlib.h\PYGdefaultZgt{}}
+\PYGdefault{c+cp}{\PYGdefaultZsh{}include} \PYGdefault{c+cpf}{\PYGdefaultZlt{}time.h\PYGdefaultZgt{}}
+
+\PYGdefault{c+c1}{// variável global sobre a quantidade de colunas/linhas da matriz}
+\PYGdefault{k+kt}{int} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{=} \PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+\PYGdefault{c+c1}{// variável que ativa impressoes na tela}
+\PYGdefault{k+kt}{char} \PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+\PYGdefault{c+c1}{// Variáveis de tempo para cálculo do intervalo de tempo de execução}
+\PYGdefault{k+kt}{time\PYGdefaultZus{}t} \PYGdefault{n}{endwait}\PYGdefault{p}{,} \PYGdefault{n}{start}\PYGdefault{p}{;}
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Estrutura que representa um tabuleiro.}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Um ponteiro para um vetor de onde representa cada posicao da rainha na coluna}
+\PYGdefault{c+cm}{ * O valor de prêmrio do tabuleiro no estado atual}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k}{typedef} \PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Tabuleiro} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{colunas}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int}   \PYGdefault{n}{premio}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{n}{Tabuleiro}\PYGdefault{p}{;}
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Estrutura de representação de Fila}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Esta fila é utilizada para organizar a ordem de seleção das rainhas}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k}{typedef} \PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Fila} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int}           \PYGdefault{n}{lugar}\PYGdefault{p}{;} \PYGdefault{c+c1}{// Posição da rainha}
+	\PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Fila} \PYGdefault{o}{*} \PYGdefault{n}{proximo}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{n}{Fila}\PYGdefault{p}{;}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que verifica se a fila passada por parâmetro está vazia.}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Retorna valores boleanos}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{char} \PYGdefault{n+nf}{Fila\PYGdefaultZus{}Esta\PYGdefaultZus{}Vazia}\PYGdefault{p}{(}\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{f}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{f} \PYGdefault{o}{==} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{k}{return} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else}
+		\PYGdefault{k}{return} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que adiciona um novo valor à fila}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Enfilera}\PYGdefault{p}{(}\PYGdefault{n}{Fila} \PYGdefault{o}{**} \PYGdefault{n}{f}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{l}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{atual} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{o}{*} \PYGdefault{n}{novo} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Cria um novo nó e adiciona informações}
+	\PYGdefault{n}{novo} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{n}{Fila}\PYGdefault{p}{));}
+	\PYGdefault{n}{novo}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{lugar} \PYGdefault{o}{=} \PYGdefault{n}{l}\PYGdefault{p}{;}
+	\PYGdefault{n}{novo}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo} \PYGdefault{o}{=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{;}
+
+
+	\PYGdefault{c+c1}{// Se a fila estiver vazia, coloca na cabeça}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{Fila\PYGdefaultZus{}Esta\PYGdefaultZus{}Vazia}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{f}\PYGdefault{p}{))} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{o}{*} \PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{n}{novo}\PYGdefault{p}{;}
+
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{c+c1}{// Caso contrário, coloca na calda}
+
+		\PYGdefault{n}{atual} \PYGdefault{o}{=} \PYGdefault{o}{*} \PYGdefault{n}{f}\PYGdefault{p}{;}
+
+		\PYGdefault{k}{while}\PYGdefault{p}{(}\PYGdefault{n}{atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo} \PYGdefault{o}{!=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{atual} \PYGdefault{o}{=} \PYGdefault{n}{atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo}\PYGdefault{p}{;}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo} \PYGdefault{o}{=} \PYGdefault{n}{novo}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que realiza a retirada de um elemento da fila seguindo sua natureza}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{int} \PYGdefault{n+nf}{Desenfilera}\PYGdefault{p}{(}\PYGdefault{n}{Fila} \PYGdefault{o}{**} \PYGdefault{n}{f}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{retirar} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{o}{*} \PYGdefault{n}{fila} \PYGdefault{o}{=} \PYGdefault{o}{*} \PYGdefault{n}{f}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{posicao} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Se a fila estiver vazia, informa erro e termina o programa}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{Fila\PYGdefaultZus{}Esta\PYGdefaultZus{}Vazia}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{f}\PYGdefault{p}{))} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n}\PYGdefault{l+s}{[ERRO] Impossível retirar de uma fila vazia.\PYGdefaultZdq{}}\PYGdefault{p}{);}
+		\PYGdefault{k}{return} \PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{c+c1}{// caso contrário, retira o primeiro elemento.}
+		\PYGdefault{n}{posicao} \PYGdefault{o}{=} \PYGdefault{n}{fila}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{lugar}\PYGdefault{p}{;}
+		\PYGdefault{n}{retirar} \PYGdefault{o}{=} \PYGdefault{n}{fila}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{fila} \PYGdefault{o}{=} \PYGdefault{n}{fila}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{free}\PYGdefault{p}{(}\PYGdefault{n}{retirar}\PYGdefault{p}{);}
+
+		\PYGdefault{o}{*}\PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{n}{fila}\PYGdefault{p}{;}
+
+		\PYGdefault{k}{return} \PYGdefault{n}{posicao}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que realiza o processo de retirar todos os elementos da fila}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Desaloca\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{f}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{retirar} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Retira todos os elementos da fila}
+	\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{f} \PYGdefault{o}{!=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{retirar} \PYGdefault{o}{=} \PYGdefault{n}{f}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{free} \PYGdefault{p}{(}\PYGdefault{n}{retirar}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento para impressão da Fila na tela}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{f}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{atual} \PYGdefault{o}{=} \PYGdefault{n}{f}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n\PYGdefaultZbs{}t\PYGdefaultZbs{}t}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+		\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{atual} \PYGdefault{o}{!=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}d \PYGdefaultZhy{}\PYGdefaultZgt{} \PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{lugar}\PYGdefault{p}{);}
+			\PYGdefault{n}{atual} \PYGdefault{o}{=} \PYGdefault{n}{atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo}\PYGdefault{p}{;}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}NULL\PYGdefaultZdq{}}\PYGdefault{p}{);}
+
+		\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento responsável por gerar uma fila de posições de rainhas em ordem aleatória.}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Primeiro cria\PYGdefaultZhy{}se um vetor com os valores de 1..n ordenado simbolizando a ordem das rainhas.}
+\PYGdefault{c+cm}{ * Em seguida, é gerado dois valores inteiros posicao1 e posicao2 de forma aleatória e estes}
+\PYGdefault{c+cm}{ *		são utilizados para a comutação dos valores situados em vetor[posicao1] e vetor[posicao2]}
+\PYGdefault{c+cm}{ * No final de algumas iterações, estes respectivos valores já desordenados são copiados para}
+\PYGdefault{c+cm}{ *		a fila para que o algoritmo use.}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n+nf}{Cria\PYGdefaultZus{}Fila\PYGdefaultZus{}Aleatoria}\PYGdefault{p}{()} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{o}{*} \PYGdefault{n}{cabeca} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila} \PYGdefault{p}{[}\PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{],}
+			\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,}
+			\PYGdefault{n}{permutacoes} \PYGdefault{o}{=} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{*} \PYGdefault{l+m+mi}{10}\PYGdefault{p}{,}
+			\PYGdefault{n}{posicao1} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{posicao2} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{temp} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Cria\PYGdefaultZhy{}se um vetor com valores ordenados de 1..n\PYGdefaultZus{}rainhas}
+	\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;} \PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{n}{i}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{c+c1}{// Realiza várias permutações dos valores deste vetor de acordo com os dois índices gerados}
+		\PYGdefault{c+c1}{// Realiza\PYGdefaultZhy{}se global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz * 10 permutações}
+	\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{permutacoes}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{c+c1}{// Gera primeiro índice}
+		\PYGdefault{n}{posicao1} \PYGdefault{o}{=} \PYGdefault{n}{rand}\PYGdefault{p}{()} \PYGdefault{o}{\PYGdefaultZpc{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;}
+
+		\PYGdefault{c+c1}{// Gera segundo índice}
+		\PYGdefault{n}{posicao2} \PYGdefault{o}{=} \PYGdefault{n}{rand}\PYGdefault{p}{()} \PYGdefault{o}{\PYGdefaultZpc{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;}
+
+		\PYGdefault{c+c1}{// Realiza a comutação dos valores dos respectivos índices}
+		\PYGdefault{n}{temp} \PYGdefault{o}{=} \PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{posicao1}\PYGdefault{p}{];}
+		\PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{posicao1}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{posicao2}\PYGdefault{p}{];}
+		\PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{posicao2}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{n}{temp}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{c+c1}{// Aloca a fila e adiciona os valores após realizar a desordem}
+	\PYGdefault{n}{cabeca} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{n}{Fila}\PYGdefault{p}{));}
+
+	\PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{n}{cabeca}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Copia os valores do vetor para a fila}
+	\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{lugar} \PYGdefault{o}{=} \PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{];}
+
+		\PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{n}{Fila}\PYGdefault{p}{));}
+
+		\PYGdefault{n}{f} \PYGdefault{o}{=} \PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo}\PYGdefault{p}{;}
+
+		\PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{lugar} \PYGdefault{o}{=} \PYGdefault{n}{vetor\PYGdefaultZus{}valores\PYGdefaultZus{}fila}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{];}
+
+	\PYGdefault{n}{f}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{proximo} \PYGdefault{o}{=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Retorna a fila desordenada}
+	\PYGdefault{k}{return} \PYGdefault{n}{cabeca}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento para retorndo do de prêmio específico de uma célula}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{int} \PYGdefault{n+nf}{Retorna\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{linha}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{coluna}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+	\PYGdefault{c+c1}{// Acessa o vetor como se fosse uma matriz comum nxn.}
+	\PYGdefault{k}{return} \PYGdefault{n}{premios}\PYGdefault{p}{[}\PYGdefault{n}{linha} \PYGdefault{o}{*} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{+} \PYGdefault{n}{coluna}\PYGdefault{p}{];}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento para realizar a leitura dos arquivo prêmio}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Este também armazena o maior premio lido e o retorna.}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Le\PYGdefaultZus{}Premios}\PYGdefault{p}{(}\PYGdefault{k+kt}{char} \PYGdefault{o}{*} \PYGdefault{n}{diretorio}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{**} \PYGdefault{n}{premios}\PYGdefault{p}{)\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{FILE} \PYGdefault{o}{*} \PYGdefault{n}{file} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{premio\PYGdefaultZus{}lido} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{quantidade\PYGdefaultZus{}celulas} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Abre o arquivo de prêmios em forma de leitura}
+	\PYGdefault{n}{file} \PYGdefault{o}{=} \PYGdefault{n}{fopen}\PYGdefault{p}{(}\PYGdefault{n}{diretorio}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}r\PYGdefaultZdq{}}\PYGdefault{p}{);}
+
+	\PYGdefault{c+c1}{// Verifica se a abertura foi feita com sucesso}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{file} \PYGdefault{o}{!=} \PYGdefault{n+nb}{NULL}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{c+c1}{//lê a primeira informação (quantas linhas existem)}
+		\PYGdefault{n}{fscanf}\PYGdefault{p}{(}\PYGdefault{n}{file}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}d\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{);}
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)}
+			\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Quantidade de colunas do tabuleiro = \PYGdefaultZpc{}d.}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{);}
+
+		\PYGdefault{c+c1}{// Se o valor de tamanho da matriz for um valor válido}
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+			\PYGdefault{n}{quantidade\PYGdefaultZus{}celulas} \PYGdefault{o}{=} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{*} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;}
+
+			\PYGdefault{c+c1}{// Aloca a matriz de prêmios}
+			\PYGdefault{o}{*} \PYGdefault{n}{premios} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{n}{quantidade\PYGdefaultZus{}celulas}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{k+kt}{int}\PYGdefault{p}{));}
+
+			\PYGdefault{c+c1}{// Começa a coleta dos prêmios}
+			\PYGdefault{n}{fscanf}\PYGdefault{p}{(}\PYGdefault{n}{file}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}d\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{premio\PYGdefaultZus{}lido}\PYGdefault{p}{);}
+
+			\PYGdefault{c+c1}{// Salvas os prêmios e coleta o próximo}
+			\PYGdefault{k}{while}\PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{quantidade\PYGdefaultZus{}celulas}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+				\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{c+c1}{// Imprime na tela o prêmio lido}
+					\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Lendo premio [\PYGdefaultZpc{}d,\PYGdefaultZpc{}d] = \PYGdefaultZpc{}d.\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{i} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZpc{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{premio\PYGdefaultZus{}lido}\PYGdefault{p}{);}
+					\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+
+				\PYGdefault{c+c1}{// Salva no vetor}
+				\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{premios}\PYGdefault{p}{)[}\PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{n}{premio\PYGdefaultZus{}lido}\PYGdefault{p}{;}
+
+				\PYGdefault{c+c1}{// Lê o próximo prêmio}
+				\PYGdefault{n}{fscanf}\PYGdefault{p}{(}\PYGdefault{n}{file}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}d\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{premio\PYGdefaultZus{}lido}\PYGdefault{p}{);}
+			\PYGdefault{p}{\PYGdefaultZcb{}}
+		\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{c+c1}{// Informa Erro}
+			\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[ERRO] Quantidade de rainhas insuficiente!}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+			\PYGdefault{n}{exit}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{c+c1}{// Fecho o arquivo}
+		\PYGdefault{n}{fclose}\PYGdefault{p}{(}\PYGdefault{n}{file}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+	\PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{c+c1}{// Informa Erro}
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[ERRO] Falha na leitura do arquivo de configuração!}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+		\PYGdefault{n}{exit}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Como utiliza\PYGdefaultZhy{}se uma estrutura fila com todas as opções e sem repetição, não}
+\PYGdefault{c+cm}{ *		existe a possibilidade de duas rainhas ficarem numa mesma linha}
+\PYGdefault{c+cm}{ *		vertical, horizontal (isso pois os valores não se repetem).}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Com isso, basta verificar se as diagonais estão conflitando.}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{char} \PYGdefault{n+nf}{Posicao\PYGdefaultZus{}Eh\PYGdefaultZus{}Valida}\PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{n}{t}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{col}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{pos}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{char} \PYGdefault{n}{esquerda\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{direita\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Inicializa dizendo que as diagonais não estão ocupadas}
+	\PYGdefault{n}{esquerda\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{n}{direita\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Da posição da rainha até a coluna 0, faça:}
+	\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{n}{col}\PYGdefault{p}{;}
+	\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{c+c1}{// Verifica:}
+		\PYGdefault{c+c1}{//		Diagonal esquerda\PYGdefaultZhy{}direita}
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{t}\PYGdefault{p}{.}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{col} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{i}\PYGdefault{p}{]}  \PYGdefault{o}{==} \PYGdefault{n}{pos} \PYGdefault{o}{+} \PYGdefault{n}{i}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{esquerda\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+		\PYGdefault{c+c1}{// Verifica:}
+		\PYGdefault{c+c1}{//		Diagonal direita\PYGdefaultZhy{}esquerda}
+		\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else}
+			\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{t}\PYGdefault{p}{.}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{col} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{i}\PYGdefault{p}{]} \PYGdefault{o}{==} \PYGdefault{n}{pos} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{i}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{direita\PYGdefaultZus{}diagonal} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{c+c1}{// Verifica validade}
+		\PYGdefault{c+c1}{// Caso alguma diagonal já esteja ocupada, aborta o procedimento}
+			\PYGdefault{c+c1}{// informando que esta posição é inválida}
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{esquerda\PYGdefaultZus{}diagonal} \PYGdefault{o}{==} \PYGdefault{l+m+mi}{0} \PYGdefault{o}{||} \PYGdefault{n}{direita\PYGdefaultZus{}diagonal} \PYGdefault{o}{==} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{k}{return} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{i}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZhy{}}\PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{c+c1}{// Verifica validade das diagonais}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{esquerda\PYGdefaultZus{}diagonal} \PYGdefault{o}{==} \PYGdefault{l+m+mi}{1} \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}} \PYGdefault{n}{direita\PYGdefaultZus{}diagonal} \PYGdefault{o}{==} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{)}
+		\PYGdefault{k}{return} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+	\PYGdefault{k}{else}
+		\PYGdefault{k}{return} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que copia os dados de um tabuleiro para outro.}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Este procedimento é utilizando quando encontra\PYGdefaultZhy{}se um novo valor de prêmio maior}
+\PYGdefault{c+cm}{ *		que o atual e assim, realiza\PYGdefaultZhy{}se a substituição do tabuleiro antigo pelo novo}
+\PYGdefault{c+cm}{ *		encontrado.}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Copia\PYGdefaultZus{}Novo\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}           \PYGdefault{o}{=} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{.}\PYGdefault{n}{premio}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;} \PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{]}   \PYGdefault{o}{=} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{.}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{];}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que adiciona uma nova rainha no tabuleiro já calculando o prêmio desta.}
+\PYGdefault{c+cm}{ *}
+\PYGdefault{c+cm}{ * Este procedimento não precisa verificar a validade da posição já que este já foi calculado}
+\PYGdefault{c+cm}{ *		quando a rainha foi selecionada.}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Adiciona\PYGdefaultZus{}Rainha\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Calculando\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{t}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{posicao}\PYGdefault{p}{,}  \PYGdefault{k+kt}{int} \PYGdefault{n}{r}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+	\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{+=} \PYGdefault{n}{Retorna\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{premios}\PYGdefault{p}{,} \PYGdefault{n}{r}\PYGdefault{p}{,} \PYGdefault{n}{posicao}\PYGdefault{p}{);}
+	\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{posicao}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{n}{r}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que retira a rainha do tabuleiro calculando o novo prêmio}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Retira\PYGdefaultZus{}Rainha\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Calculando\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{t}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{posicao}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{n}{r}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{\PYGdefaultZhy{}=} \PYGdefault{n}{Retorna\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{premios}\PYGdefault{p}{,} \PYGdefault{n}{r}\PYGdefault{p}{,} \PYGdefault{n}{posicao}\PYGdefault{p}{);}
+	\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{posicao}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que inicializa um novo tabuleiro}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n+nf}{Cria\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{()\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{t} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{n}{t} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro}\PYGdefault{p}{));}
+	\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas} \PYGdefault{o}{=} \PYGdefault{n}{calloc}\PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{,} \PYGdefault{k}{sizeof}\PYGdefault{p}{(}\PYGdefault{k+kt}{int}\PYGdefault{p}{));}
+
+
+	\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;} \PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{)}
+		\PYGdefault{n}{t}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{i}\PYGdefault{p}{]} \PYGdefault{o}{=} \PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{return} \PYGdefault{n}{t}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que imprime o tabuleiro junto com os prêmios}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Imprime\PYGdefaultZus{}Tabuleiro} \PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{n}{t}\PYGdefault{p}{,} \PYGdefault{n}{Tabuleiro} \PYGdefault{n}{maior}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{j} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+
+		\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;} \PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+				\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}t}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+			\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{j} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{*} \PYGdefault{l+m+mi}{2}\PYGdefault{p}{;} \PYGdefault{n}{j}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+				\PYGdefault{k}{if} \PYGdefault{p}{(} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{==} \PYGdefault{n}{t}\PYGdefault{p}{.}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{j}\PYGdefault{p}{])}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}3d \PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{i}\PYGdefault{p}{);}
+					\PYGdefault{k}{else}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{} \PYGdefaultZhy{}1 \PYGdefaultZdq{}}\PYGdefault{p}{);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+				\PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{j} \PYGdefault{o}{==} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{)}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t\PYGdefaultZbs{}t}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+					\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}3d \PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{[}\PYGdefault{n}{i} \PYGdefault{o}{*} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{+} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{]);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+
+			\PYGdefault{p}{\PYGdefaultZcb{}}
+
+			\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Premio\PYGdefaultZus{}Atual: \PYGdefaultZpc{}d;}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Maior\PYGdefaultZus{}Premio: \PYGdefaultZpc{}d.\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{t}\PYGdefault{p}{.}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{maior}\PYGdefault{p}{.}\PYGdefault{n}{premio}\PYGdefault{p}{);}
+
+		\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que imprime o tabuleiro, junto com os prêmios informando fim da execução}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Imprime\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Final} \PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{n}{maior}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{j} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{FILE} \PYGdefault{o}{*} \PYGdefault{n}{saida} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Resultado Final do Processamento:\PYGdefaultZdq{}}\PYGdefault{p}{);}
+
+		\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{i} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{;} \PYGdefault{n}{i}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+				\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}t}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+			\PYGdefault{k}{for} \PYGdefault{p}{(}\PYGdefault{n}{j} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{*} \PYGdefault{l+m+mi}{2}\PYGdefault{p}{;} \PYGdefault{n}{j}\PYGdefault{o}{++}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+				\PYGdefault{k}{if} \PYGdefault{p}{(} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{i} \PYGdefault{o}{==} \PYGdefault{n}{maior}\PYGdefault{p}{.}\PYGdefault{n}{colunas}\PYGdefault{p}{[}\PYGdefault{n}{j}\PYGdefault{p}{])}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}3d \PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{i}\PYGdefault{p}{);}
+					\PYGdefault{k}{else}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{} \PYGdefaultZhy{}1 \PYGdefaultZdq{}}\PYGdefault{p}{);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+				\PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{j} \PYGdefault{o}{==} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{)}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t\PYGdefaultZbs{}t}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+					\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}3d \PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{[}\PYGdefault{n}{i} \PYGdefault{o}{*} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{+} \PYGdefault{n}{j} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{]);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+			\PYGdefault{p}{\PYGdefaultZcb{}}
+
+			\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Premio: \PYGdefaultZpc{}d.\PYGdefaultZdq{}}\PYGdefault{p}{,}\PYGdefault{n}{maior}\PYGdefault{p}{.}\PYGdefault{n}{premio}\PYGdefault{p}{);}
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Resultado Final do Processamento.}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{saida} \PYGdefault{o}{=} \PYGdefault{n}{fopen}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}algoritmo2.txt\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}a\PYGdefaultZdq{}}\PYGdefault{p}{);}
+
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{saida}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{fprintf}\PYGdefault{p}{(}\PYGdefault{n}{saida}\PYGdefault{p}{,} \PYGdefault{l+s}{\PYGdefaultZdq{}\PYGdefaultZpc{}d}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{maior}\PYGdefault{p}{.}\PYGdefault{n}{premio}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{fclose}\PYGdefault{p}{(}\PYGdefault{n}{saida}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que libera memória}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Desaloca\PYGdefaultZus{}Tabuleiro} \PYGdefault{p}{(}\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{**} \PYGdefault{n}{f}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{f} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{free}\PYGdefault{p}{((}\PYGdefault{o}{*}\PYGdefault{n}{f}\PYGdefault{p}{)}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{colunas}\PYGdefault{p}{);}
+		\PYGdefault{n}{free}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{f}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Procedimento que libera memória}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{Desaloca\PYGdefaultZus{}Premios} \PYGdefault{p}{(}\PYGdefault{k+kt}{int} \PYGdefault{o}{**} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{premios} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{)}
+		\PYGdefault{n}{free}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{premios}\PYGdefault{p}{);}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{c+cm}{/*}
+\PYGdefault{c+cm}{ * Método de branch and bound desenvolvido}
+\PYGdefault{c+cm}{ */}
+\PYGdefault{k+kt}{void} \PYGdefault{n+nf}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{k+kt}{int} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{Fila} \PYGdefault{o}{**} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{n}{iteracoes} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{float} \PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{=} \PYGdefault{l+m+mi}{0}\PYGdefault{p}{;}
+
+	\PYGdefault{c+c1}{// Recebe o tempo atual.}
+	\PYGdefault{n}{start} \PYGdefault{o}{=} \PYGdefault{n}{time}\PYGdefault{p}{(}\PYGdefault{n+nb}{NULL}\PYGdefault{p}{);}
+
+	\PYGdefault{c+c1}{// Verifica se o tempo excedeu o liminte estabelecido.}
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{start} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{n}{endwait}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{c+c1}{// Se sim, cancela totalmente a continuação da recursão}
+		\PYGdefault{k}{return} \PYGdefault{p}{;}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+	\PYGdefault{c+c1}{// Varre a fila com os valores que sobraram}
+		\PYGdefault{c+c1}{// A cada recursão, um item é retirado}
+
+	\PYGdefault{c+c1}{// Caso tenha percorrido todas as rainhas deste contexto de recursão,}
+		\PYGdefault{c+c1}{// o while será impedido de ser executando forçando a realizar o}
+		\PYGdefault{c+c1}{// retorno à um nível acima de recursao}
+	\PYGdefault{k}{while} \PYGdefault{p}{(}\PYGdefault{n}{iteracoes} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZhy{}} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+		\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+		\PYGdefault{n}{Imprime\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+		\PYGdefault{c+c1}{// Retira um item da fila e salva numa variável local}
+		\PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp} \PYGdefault{o}{=} \PYGdefault{n}{Desenfilera}\PYGdefault{p}{(} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes} \PYGdefault{p}{);}
+
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp} \PYGdefault{o}{==} \PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{Desaloca\PYGdefaultZus{}Premios}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+			\PYGdefault{n}{Desaloca\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{);}
+			\PYGdefault{n}{Desaloca\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{);}
+			\PYGdefault{n}{exit}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+		\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+
+		\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+			\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t\PYGdefaultZbs{}t}\PYGdefault{l+s}{Buffer\PYGdefaultZus{}Atual: \PYGdefaultZpc{}d\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{);}
+			\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+		\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+		\PYGdefault{c+c1}{// Testa a validade da rainha retirada no momento}
+			\PYGdefault{c+c1}{// Se for posição válida realizará o processamento desta}
+			\PYGdefault{c+c1}{// Caso contrário, ela será posta no final da fila=}
+		\PYGdefault{k}{if}\PYGdefault{p}{(}\PYGdefault{n}{Posicao\PYGdefaultZus{}Eh\PYGdefaultZus{}Valida}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{))} \PYGdefault{p}{\PYGdefaultZob{}}
+
+			\PYGdefault{c+c1}{// Adiciona a rainha no tabuleiro calculando o prêmio com sua inclusão}
+			\PYGdefault{n}{Adiciona\PYGdefaultZus{}Rainha\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Calculando\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+			\PYGdefault{n}{Imprime\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+			\PYGdefault{c+c1}{// Se a fila estiver vazia, significa que acabou de ser gerado uma solução}
+				\PYGdefault{c+c1}{// válida.}
+			\PYGdefault{c+c1}{// Assim, será verificado se o prêmio é melhor que o atual.}
+			\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{Fila\PYGdefaultZus{}Esta\PYGdefaultZus{}Vazia}\PYGdefault{p}{(}\PYGdefault{o}{*} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{))} \PYGdefault{p}{\PYGdefaultZob{}}
+
+				\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Novo Recorde Encontrado!\PYGdefaultZdq{}}\PYGdefault{p}{);}
+					\PYGdefault{n}{Copia\PYGdefaultZus{}Novo\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{);}
+
+					\PYGdefault{n}{Imprime\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+				\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+
+				\PYGdefault{c+c1}{// Após chegar na folha, a recursão é revertida até que encontre}
+					\PYGdefault{c+c1}{// uma próxima solução pra explorar.}
+				\PYGdefault{n}{Enfilera}\PYGdefault{p}{(}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{);}
+
+				\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+
+				\PYGdefault{c+c1}{// Como mencionado, a raínha é posta novamente na fila para a procura}
+					\PYGdefault{c+c1}{// de novas soluções}
+				\PYGdefault{n}{Retira\PYGdefaultZus{}Rainha\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Calculando\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+				\PYGdefault{k}{return} \PYGdefault{p}{;}
+
+
+			\PYGdefault{c+c1}{// Se não for a última rainha, então realiza as análises de bound}
+			\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+
+				\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)}
+					\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZpc{}10f}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz}\PYGdefault{p}{);}
+
+
+				\PYGdefault{c+c1}{//Considerações}
+					\PYGdefault{c+c1}{// \PYGdefaultZhy{} Ler o relatório que acompanha o código.}
+					\PYGdefault{c+c1}{// \PYGdefaultZhy{} Enquanto o maior premio encontrado ainda for 0, então os filtros não}
+							\PYGdefault{c+c1}{// serão aplicados}
+
+
+				\PYGdefault{c+c1}{// Filtro 1}
+				\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{0}  \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}}  \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZgt{}=} \PYGdefault{l+m+mf}{0.60}  \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}} \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{l+m+mf}{0.7}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+					\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{=}  \PYGdefault{p}{(}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{/} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{;}
+
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Premio Atual: \PYGdefaultZpc{}d;}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Maior Premio: \PYGdefaultZpc{}d}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Fator Continua Recursão: \PYGdefaultZpc{}.7f\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao}\PYGdefault{p}{);}
+						\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+					\PYGdefault{p}{\PYGdefaultZcb{}}
+
+					\PYGdefault{c+c1}{//if (fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao \PYGdefaultZgt{} 0.50)}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{l+m+mf}{0.6}\PYGdefault{p}{)}
+						\PYGdefault{n}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{n}{coluna\PYGdefaultZus{}atual} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+				\PYGdefault{c+c1}{// Filtro 2}
+				\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{0}  \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}}  \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZgt{}=} \PYGdefault{l+m+mf}{0.7} \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}}  \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZlt{}} \PYGdefault{l+m+mf}{0.8}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+					\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{=}  \PYGdefault{p}{(}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{/} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{;}
+
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Premio Atual: \PYGdefaultZpc{}d;}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Maior Premio: \PYGdefaultZpc{}d}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Fator Continua Recursão: \PYGdefaultZpc{}.7f\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao}\PYGdefault{p}{);}
+						\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+					\PYGdefault{p}{\PYGdefaultZcb{}}
+
+					\PYGdefault{c+c1}{//if (fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao \PYGdefaultZgt{} 0.60)}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{l+m+mf}{0.7}\PYGdefault{p}{)}
+						\PYGdefault{n}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{n}{coluna\PYGdefaultZus{}atual} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+				\PYGdefault{c+c1}{// Filtro 3}
+				\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{0}  \PYGdefault{o}{\PYGdefaultZam{}\PYGdefaultZam{}}  \PYGdefault{p}{((}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{)} \PYGdefault{o}{/} \PYGdefault{n}{global\PYGdefaultZus{}tamanho\PYGdefaultZus{}matriz} \PYGdefault{o}{\PYGdefaultZgt{}=} \PYGdefault{l+m+mf}{0.8}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+
+					\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{=}  \PYGdefault{p}{(}\PYGdefault{k+kt}{float}\PYGdefault{p}{)} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio} \PYGdefault{o}{/} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{;}
+
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+						\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Premio Atual: \PYGdefaultZpc{}d;}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Maior Premio: \PYGdefaultZpc{}d}\PYGdefault{l+s+se}{\PYGdefaultZbs{}t}\PYGdefault{l+s}{Fator Continua Recursao: \PYGdefaultZpc{}.7f\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{o}{\PYGdefaultZhy{}\PYGdefaultZgt{}}\PYGdefault{n}{premio}\PYGdefault{p}{,} \PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao}\PYGdefault{p}{);}
+						\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+					\PYGdefault{p}{\PYGdefaultZcb{}}
+
+					\PYGdefault{c+c1}{//if (fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao \PYGdefaultZgt{} 0.82)}
+					\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{fator\PYGdefaultZus{}continua\PYGdefaultZus{}recursao} \PYGdefault{o}{\PYGdefaultZgt{}} \PYGdefault{l+m+mf}{0.8}\PYGdefault{p}{)}
+						\PYGdefault{n}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{n}{coluna\PYGdefaultZus{}atual} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+				\PYGdefault{c+c1}{// Enquanto o maior premio encontrado ainda for 0, então os filtros não}
+					\PYGdefault{c+c1}{// serão aplicados e a recursão segue normalmente usando força}
+					\PYGdefault{c+c1}{// bruta}
+				\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+					\PYGdefault{n}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{n}{coluna\PYGdefaultZus{}atual} \PYGdefault{o}{+} \PYGdefault{l+m+mi}{1}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maior}\PYGdefault{p}{,} \PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+				\PYGdefault{p}{\PYGdefaultZcb{}}
+
+				\PYGdefault{c+c1}{// Ao retornar das recursões, a rainha atual será retirada do tabuleiro e colocada na fila novamente}
+					\PYGdefault{c+c1}{// e será procurado a próxima solução disponível}
+
+				\PYGdefault{n}{Enfilera}\PYGdefault{p}{(}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{);}
+
+				\PYGdefault{n}{Retira\PYGdefaultZus{}Rainha\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Calculando\PYGdefaultZus{}Premio}\PYGdefault{p}{(}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+				\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+
+				\PYGdefault{n}{iteracoes}\PYGdefault{o}{++}\PYGdefault{p}{;}
+			\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{c+c1}{// if}
+
+
+		\PYGdefault{c+c1}{// Se a posição escolhida não for válida}
+		\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+
+			\PYGdefault{k}{if}\PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+				\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Posição Inválida. Retornando o valor \PYGdefaultZpc{}d à fila\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{);}
+				\PYGdefault{n}{fflush}\PYGdefault{p}{(}\PYGdefault{n}{stdout}\PYGdefault{p}{);}
+			\PYGdefault{p}{\PYGdefaultZcb{}}
+
+			\PYGdefault{c+c1}{// Readiciona\PYGdefaultZhy{}la no final da fila}
+			\PYGdefault{n}{Enfilera}\PYGdefault{p}{(}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{,} \PYGdefault{n}{linha\PYGdefaultZus{}atual\PYGdefaultZus{}temp}\PYGdefault{p}{);}
+
+			\PYGdefault{n}{Imprime\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{posicoes\PYGdefaultZus{}restantes}\PYGdefault{p}{);}
+
+			\PYGdefault{c+c1}{// Passa pra próxima rainha}
+			\PYGdefault{n}{iteracoes}\PYGdefault{o}{++}\PYGdefault{p}{;}
+
+		\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{c+c1}{// if}
+
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{c+c1}{// While}
+
+
+	\PYGdefault{c+c1}{// Após ter percorrido todos as soluções deste nível e seus subníveis}
+		\PYGdefault{c+c1}{// é retornado um nível para continuar a busca.}
+
+	\PYGdefault{k}{if}\PYGdefault{p}{(}\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado}\PYGdefault{p}{)}
+		\PYGdefault{n}{printf}\PYGdefault{p}{(}\PYGdefault{l+s}{\PYGdefaultZdq{}}\PYGdefault{l+s+se}{\PYGdefaultZbs{}n}\PYGdefault{l+s}{[INFO] Saindo do nível \PYGdefaultZpc{}d\PYGdefaultZdq{}}\PYGdefault{p}{,} \PYGdefault{n}{coluna\PYGdefaultZus{}atual}\PYGdefault{p}{);}
+
+	\PYGdefault{k}{return} \PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+
+
+
+\PYGdefault{k+kt}{int} \PYGdefault{n+nf}{main}\PYGdefault{p}{(}\PYGdefault{k+kt}{int} \PYGdefault{n}{argc}\PYGdefault{p}{,} \PYGdefault{k+kt}{char}\PYGdefault{o}{**} \PYGdefault{n}{argv}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int} \PYGdefault{o}{*} \PYGdefault{n}{premios}\PYGdefault{p}{;}
+	\PYGdefault{k+kt}{char} \PYGdefault{o}{*} \PYGdefault{n}{diretorio}\PYGdefault{p}{;}
+	\PYGdefault{n}{Tabuleiro} \PYGdefault{o}{*} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{o}{*} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maximo\PYGdefaultZus{}encontrado}\PYGdefault{p}{;}
+	\PYGdefault{n}{Fila} \PYGdefault{o}{*} \PYGdefault{n}{fila\PYGdefaultZus{}rainhas}\PYGdefault{p}{;}
+    \PYGdefault{k+kt}{time\PYGdefaultZus{}t} \PYGdefault{n}{seconds}\PYGdefault{p}{;}
+
+	\PYGdefault{k}{if} \PYGdefault{p}{(}\PYGdefault{n}{argc} \PYGdefault{o}{!=} \PYGdefault{l+m+mi}{4}\PYGdefault{p}{)} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{diretorio} \PYGdefault{o}{=} \PYGdefault{n}{argv}\PYGdefault{p}{[}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{];}
+		\PYGdefault{n}{srand}\PYGdefault{p}{(}\PYGdefault{n}{atoi}\PYGdefault{p}{(}\PYGdefault{n}{argv}\PYGdefault{p}{[}\PYGdefault{l+m+mi}{2}\PYGdefault{p}{]));}
+		\PYGdefault{n}{seconds} \PYGdefault{o}{=} \PYGdefault{n}{atoi}\PYGdefault{p}{(}\PYGdefault{n}{argv}\PYGdefault{p}{[}\PYGdefault{l+m+mi}{3}\PYGdefault{p}{]);}
+		\PYGdefault{n}{global\PYGdefaultZus{}imprime\PYGdefaultZus{}tela\PYGdefaultZus{}ativado} \PYGdefault{o}{=} \PYGdefault{n}{atoi}\PYGdefault{p}{(}\PYGdefault{n}{argv}\PYGdefault{p}{[}\PYGdefault{l+m+mi}{4}\PYGdefault{p}{]);}
+
+	\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{k}{else} \PYGdefault{p}{\PYGdefaultZob{}}
+		\PYGdefault{n}{exit}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZhy{}}\PYGdefault{l+m+mi}{1}\PYGdefault{p}{);}
+	\PYGdefault{p}{\PYGdefaultZcb{}}
+
+	\PYGdefault{n}{Le\PYGdefaultZus{}Premios}\PYGdefault{p}{(}\PYGdefault{n}{diretorio}\PYGdefault{p}{,} \PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+	\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual} \PYGdefault{o}{=} \PYGdefault{n}{Cria\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{();}
+	\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maximo\PYGdefaultZus{}encontrado} \PYGdefault{o}{=} \PYGdefault{n}{Cria\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{();}
+
+	\PYGdefault{n}{fila\PYGdefaultZus{}rainhas} \PYGdefault{o}{=} \PYGdefault{n}{Cria\PYGdefaultZus{}Fila\PYGdefaultZus{}Aleatoria}\PYGdefault{p}{();}
+
+	\PYGdefault{n}{start} \PYGdefault{o}{=} \PYGdefault{n}{time}\PYGdefault{p}{(}\PYGdefault{n+nb}{NULL}\PYGdefault{p}{);}
+
+    \PYGdefault{n}{endwait} \PYGdefault{o}{=} \PYGdefault{n}{start} \PYGdefault{o}{+} \PYGdefault{n}{seconds}\PYGdefault{p}{;}
+
+	\PYGdefault{n}{n\PYGdefaultZus{}Rainhas\PYGdefaultZus{}Prize}\PYGdefault{p}{(}\PYGdefault{l+m+mi}{0}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{,} \PYGdefault{n}{tabuleiro\PYGdefaultZus{}maximo\PYGdefaultZus{}encontrado}\PYGdefault{p}{,} \PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{fila\PYGdefaultZus{}rainhas}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+	\PYGdefault{n}{Imprime\PYGdefaultZus{}Tabuleiro\PYGdefaultZus{}Final}\PYGdefault{p}{(}\PYGdefault{o}{*}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maximo\PYGdefaultZus{}encontrado}\PYGdefault{p}{,} \PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+
+	\PYGdefault{n}{Desaloca\PYGdefaultZus{}Fila}\PYGdefault{p}{(}\PYGdefault{n}{fila\PYGdefaultZus{}rainhas}\PYGdefault{p}{);}
+
+	\PYGdefault{n}{Desaloca\PYGdefaultZus{}Premios}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{premios}\PYGdefault{p}{);}
+
+	\PYGdefault{n}{Desaloca\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}maximo\PYGdefaultZus{}encontrado}\PYGdefault{p}{);}
+	\PYGdefault{n}{Desaloca\PYGdefaultZus{}Tabuleiro}\PYGdefault{p}{(}\PYGdefault{o}{\PYGdefaultZam{}}\PYGdefault{n}{tabuleiro\PYGdefaultZus{}atual}\PYGdefault{p}{);}
+
+	\PYGdefault{k}{return} \PYGdefault{p}{(}\PYGdefault{n}{EXIT\PYGdefaultZus{}SUCCESS}\PYGdefault{p}{);}
+\PYGdefault{p}{\PYGdefaultZcb{}}
+\end{Verbatim}

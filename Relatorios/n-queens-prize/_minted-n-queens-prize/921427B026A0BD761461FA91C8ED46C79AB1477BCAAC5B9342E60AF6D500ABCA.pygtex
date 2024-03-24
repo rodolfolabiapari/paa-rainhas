@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGdefault{k}{typedef} \PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Fila} \PYGdefault{p}{\PYGdefaultZob{}}
+	\PYGdefault{k+kt}{int}           \PYGdefault{n}{lugar}\PYGdefault{p}{;}
+	\PYGdefault{k}{struct} \PYGdefault{n}{Struct\PYGdefaultZus{}Fila} \PYGdefault{o}{*} \PYGdefault{n}{proximo}\PYGdefault{p}{;}
+\PYGdefault{p}{\PYGdefaultZcb{}} \PYGdefault{n}{Fila}\PYGdefault{p}{;}
+\end{Verbatim}

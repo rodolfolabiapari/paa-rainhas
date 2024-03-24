@@ -1,0 +1,39 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGdefault{c+ch}{\PYGdefaultZsh{}!/bin/bash}
+
+\PYGdefault{n+nb}{echo} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}Quantas iteracoes?\PYGdefaultZdq{}}
+\PYGdefault{n+nb}{read} quantidade\PYGdefaultZus{}iteracoes\PYGdefault{p}{;}
+\PYGdefault{n+nb}{echo}
+
+\PYGdefault{n+nb}{eval} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}rm algori*\PYGdefaultZdq{}}
+\PYGdefault{n+nb}{eval} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}gcc n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}Backtracking/n\PYGdefaultZhy{}queens\PYGdefaultZhy{}prize\PYGdefaultZhy{}backtracking.c \PYGdefaultZhy{}Ofast \PYGdefaultZhy{}o n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}Backtracking/n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}Backtracking\PYGdefaultZdq{}}
+\PYGdefault{n+nb}{eval} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}gcc n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}1/n\PYGdefaultZhy{}queens\PYGdefaultZhy{}prize\PYGdefaultZhy{}branchAndBound\PYGdefaultZhy{}1.c \PYGdefaultZhy{}Ofast \PYGdefaultZhy{}o n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}1/n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}1\PYGdefaultZdq{}}
+\PYGdefault{n+nb}{eval} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}gcc n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}2/n\PYGdefaultZhy{}queens\PYGdefaultZhy{}prize\PYGdefaultZhy{}branchAndBound\PYGdefaultZhy{}2.c \PYGdefaultZhy{}Ofast \PYGdefaultZhy{}o n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}2/n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}2\PYGdefaultZdq{}}
+
+\PYGdefault{n+nv}{instancias}\PYGdefault{o}{=(} nqp005.txt nqp008.txt nqp010.txt nqp020.txt nqp030.txt nqp040.txt nqp050.txt nqp060.txt nqp070.txt nqp080.txt nqp090.txt nqp100.txt nqp200.txt \PYGdefault{o}{)}
+
+\PYGdefault{n+nv}{algoritmos}\PYGdefault{o}{=(} n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}Backtracking n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}1 n\PYGdefaultZhy{}Queens\PYGdefaultZhy{}Prize\PYGdefaultZhy{}BranchAndBound\PYGdefaultZhy{}2 \PYGdefault{o}{)}
+
+\PYGdefault{k}{for} algoritmo in \PYGdefault{l+s+s2}{\PYGdefaultZdq{}}\PYGdefault{l+s+si}{\PYGdefaultZdl{}\PYGdefaultZob{}}\PYGdefault{n+nv}{algoritmos}\PYGdefault{p}{[@]}\PYGdefault{l+s+si}{\PYGdefaultZcb{}}\PYGdefault{l+s+s2}{\PYGdefaultZdq{}}
+\PYGdefault{k}{do}
+	\PYGdefault{n+nb}{echo} \PYGdefault{n+nv}{\PYGdefaultZdl{}algoritmo}
+
+	\PYGdefault{k}{for} instancia in \PYGdefault{l+s+s2}{\PYGdefaultZdq{}}\PYGdefault{l+s+si}{\PYGdefaultZdl{}\PYGdefaultZob{}}\PYGdefault{n+nv}{instancias}\PYGdefault{p}{[@]}\PYGdefault{l+s+si}{\PYGdefaultZcb{}}\PYGdefault{l+s+s2}{\PYGdefaultZdq{}}
+	\PYGdefault{k}{do}
+		\PYGdefault{n+nb}{echo} \PYGdefault{n+nv}{\PYGdefaultZdl{}instancia}
+
+		\PYGdefault{k}{for} \PYGdefault{o}{((} \PYGdefault{n+nv}{i} \PYGdefault{o}{=} 0\PYGdefault{p}{;} i \PYGdefaultZlt{} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}}\PYGdefault{n+nv}{\PYGdefaultZdl{}quantidade\PYGdefaultZus{}iteracoes}\PYGdefault{l+s+s2}{\PYGdefaultZdq{}}\PYGdefault{p}{;} i++ \PYGdefault{o}{))}\PYGdefault{p}{;} \PYGdefault{k}{do}
+			\PYGdefault{n+nb}{echo} \PYGdefault{l+s+s2}{\PYGdefaultZdq{}}\PYGdefault{n+nv}{\PYGdefaultZdl{}i}\PYGdefault{l+s+s2}{\PYGdefaultZdq{}}
+
+			\PYGdefault{n+nv}{cmd}\PYGdefault{o}{=}\PYGdefault{l+s+s2}{\PYGdefaultZdq{}./}\PYGdefault{n+nv}{\PYGdefaultZdl{}algoritmo}\PYGdefault{l+s+s2}{/}\PYGdefault{n+nv}{\PYGdefaultZdl{}algoritmo}\PYGdefault{l+s+s2}{ }\PYGdefault{n+nv}{\PYGdefaultZdl{}instancia}\PYGdefault{l+s+s2}{ }\PYGdefault{n+nv}{\PYGdefaultZdl{}i}\PYGdefault{l+s+s2}{*1234 60 0\PYGdefaultZdq{}}
+			date
+			\PYGdefault{n+nb}{echo} \PYGdefault{n+nv}{\PYGdefaultZdl{}cmd}
+			\PYGdefault{n+nv}{\PYGdefaultZdl{}cmd}
+		\PYGdefault{k}{done}
+		\PYGdefault{n+nb}{echo}
+
+	\PYGdefault{k}{done}
+	\PYGdefault{n+nb}{echo}
+
+\PYGdefault{k}{done}
+\end{Verbatim}
